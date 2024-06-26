@@ -1,9 +1,11 @@
 package id.my.kaorikizuna.incu8tor.ui.components
-
+import androidx.compose.animation.expandVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -19,13 +21,16 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarColors
 import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,6 +47,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
@@ -55,29 +61,6 @@ fun onSearchClicked(searchTitle: String) {
     println("Searched for $searchTitle")
 }
 
-//@OptIn(ExperimentalMaterial3Api::class)
-//@Composable
-//fun Incu8torSearchBar(onSearchClicked: (String) -> Unit) {
-//    var showSearchField by remember { mutableStateOf(false) }
-//    if (showSearchField) {
-//        SearchField(onSearchClicked)
-//    } else {
-//        CenterAlignedTopAppBar(
-//            title = { Text(stringResource(id = R.string.app_name)) },
-//            actions = {
-//                IconButton(onClick = { showSearchField = !showSearchField }) {
-//                    if (showSearchField) {
-//                        Icon(imageVector = Icons.Filled.Close, contentDescription = "Close")
-//                    } else {
-//                        Icon(imageVector = Icons.Filled.Search, contentDescription = "Search")
-//                    }
-//                }
-//            },
-//            modifier = Modifier.fillMaxWidth(),
-//        )
-//    }
-//}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Incu8torSearchBar(onSearchClicked: (String) -> Unit) {
@@ -85,21 +68,26 @@ fun Incu8torSearchBar(onSearchClicked: (String) -> Unit) {
     TopAppBar(
         title = {
             if (showSearchField) {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    SearchField(onSearchClicked)
+                }
                 SearchField(onSearchClicked)
             } else {
                 Text(stringResource(id = R.string.app_name))
             }
         },
         actions = {
-            IconButton(onClick = { showSearchField = !showSearchField }) {
-                if (showSearchField) {
-                    Icon(imageVector = Icons.Filled.Close, contentDescription = "Close")
-                } else {
+            if (!showSearchField) {
+                IconButton(onClick = { showSearchField = true }) {
                     Icon(imageVector = Icons.Filled.Search, contentDescription = "Search")
                 }
             }
         },
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth(),
         // this is quite handy
         navigationIcon = {
             if (showSearchField) {
@@ -108,7 +96,8 @@ fun Incu8torSearchBar(onSearchClicked: (String) -> Unit) {
                 }
             }
         }
-    )}
+    )
+}
 
 @Preview
 @Composable
@@ -123,17 +112,25 @@ fun SearchField(
 ) {
     var searchText by remember { mutableStateOf("") }
 
+    // the problem of clipping lies on using a big font
     OutlinedTextField(
         value = searchText,
-        onValueChange = { searchText = it },
-        label = { Text("Search") },
+        onValueChange = { it -> searchText = it },
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 50.dp),
+            .fillMaxWidth(),
+        maxLines = 1,
+        singleLine = true,
         leadingIcon = {
             Icon(
                 imageVector = Icons.Filled.Search, contentDescription = "Search"
             )
+        },
+        trailingIcon = {
+            if (searchText.isNotEmpty()) {
+                IconButton(onClick = { searchText = "" }) {
+                    Icon(imageVector = Icons.Filled.Close, contentDescription = "Clear")
+                }
+            }
         },
         // display search icon when displaying the virtual keyboard
         keyboardOptions = KeyboardOptions(
@@ -143,7 +140,9 @@ fun SearchField(
         // on search clicked, callback to the onSearchClicked function
         keyboardActions = KeyboardActions(onSearch = {
             onSearchClicked(searchText)
-        })
+        }),
+
+        textStyle = TextStyle(fontSize = MaterialTheme.typography.labelLarge.fontSize)
 
     )
 }
