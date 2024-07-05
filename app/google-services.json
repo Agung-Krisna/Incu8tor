@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "817059975623",
+    "project_id": "incu8tor",
+    "storage_bucket": "incu8tor.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:817059975623:android:e4c325e70676461de149e2",
+        "android_client_info": {
+          "package_name": "id.my.kaorikizuna.incu8tor"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA__sEY6Q-Xsi0NZDIOt61uOVotWGuCjxA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
