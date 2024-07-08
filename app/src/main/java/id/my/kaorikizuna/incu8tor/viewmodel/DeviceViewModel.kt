@@ -2,6 +2,7 @@ package id.my.kaorikizuna.incu8tor.viewmodel
 
 import android.content.ContentValues.TAG
 import android.util.Log
+import androidx.compose.runtime.Composable
 import androidx.lifecycle.ViewModel
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -11,7 +12,7 @@ import id.my.kaorikizuna.incu8tor.model.Device
 import id.my.kaorikizuna.incu8tor.model.DeviceDetail
 
 
-class DeviceViewModel() : ViewModel() {
+class DeviceViewModel : ViewModel() {
 
     private val database = FirebaseDatabase.getInstance()
     private val devicesReference = database.getReference("devices")
@@ -48,4 +49,16 @@ class DeviceViewModel() : ViewModel() {
         devicesReference.child(macAddress).setValue(device)
     }
 
+    fun updateDevice(macAddress: String, device: DeviceDetail, onSuccess: () -> Unit) {
+        devicesReference.child(macAddress).setValue(device)
+    }
+
+    fun getDevice(macAddress: String, onSuccess: (DeviceDetail) -> Unit) {
+        devicesReference.child(macAddress).get().addOnSuccessListener {
+            // getValue method deserializes the data into a DeviceDetail object
+            val device = it.getValue(DeviceDetail::class.java)!!
+            Log.d(TAG, "getDevice: $device")
+            onSuccess(device)
+        }
+    }
 }

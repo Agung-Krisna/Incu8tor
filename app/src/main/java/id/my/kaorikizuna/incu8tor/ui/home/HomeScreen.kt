@@ -22,17 +22,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.toMutableStateList
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import id.my.kaorikizuna.incu8tor.R
 import id.my.kaorikizuna.incu8tor.model.Device
 import id.my.kaorikizuna.incu8tor.model.DeviceDetail
 import id.my.kaorikizuna.incu8tor.ui.components.Incu8torSearchBar
+import id.my.kaorikizuna.incu8tor.ui.components.ErrorToast
 import id.my.kaorikizuna.incu8tor.ui.components.onSearchClicked
 import id.my.kaorikizuna.incu8tor.viewmodel.DeviceViewModel
 
@@ -52,10 +48,14 @@ fun HomeScreen() {
 
 //  turns out that the second positional argument of remember is the setter function,
     val (devices, setDevices) = remember { mutableStateOf(emptyList<DeviceDetail>()) }
-    viewModel.getAllDevices(onSuccess = {
-        setDevices(it)
-        Log.d("devices", "${devices.toString()} ${it.size}")
-    })
+
+    // declaring error toast
+    val errorToast = remember { ErrorToast() }
+
+    // applying the local context
+    errorToast.apply {
+        context = LocalContext.current
+    }
 
     Scaffold(topBar = {
         Incu8torSearchBar(::onSearchClicked)
@@ -67,7 +67,16 @@ fun HomeScreen() {
         }
     }) { innerPadding ->
         Column {
+
+            viewModel.getAllDevices(onSuccess = {
+                setDevices(it)
+                Log.d("devices", "$devices ${it.size}")
+            }, onFailure = { exception ->
+                errorToast.show(exception.message.toString())
+            })
+
             Spacer(modifier = Modifier.height(10.dp))
+
             LazyColumn(
                 modifier = Modifier.padding(innerPadding),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -92,10 +101,16 @@ fun DeviceCard(deviceDetail: DeviceDetail) {
                 .padding(10.dp)
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(deviceDetail.deviceName, style = MaterialTheme.typography.titleMedium)
-                Text(deviceDetail.macAddress, style = MaterialTheme.typography.bodySmall)
+                Text(
+                    text = deviceDetail.deviceName,
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    text = deviceDetail.macAddress,
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
-//            TODO
+//            TODO fix to tell if the device is connected or not
             // the icon needs to be within a container (box or row) to be able to be centered vertically
 //            Row(modifier = Modifier.align(Alignment.CenterVertically)) {
 //                Icon(
