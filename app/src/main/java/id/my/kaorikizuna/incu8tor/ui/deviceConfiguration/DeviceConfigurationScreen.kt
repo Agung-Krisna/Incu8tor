@@ -1,4 +1,4 @@
-//package id.my.kaorikizuna.incu8tor.ui.deviceConfiguration
+package id.my.kaorikizuna.incu8tor.ui.deviceConfiguration//package id.my.kaorikizuna.incu8tor.ui.deviceConfiguration
 //
 //import androidx.compose.foundation.layout.Column
 //import androidx.compose.foundation.layout.fillMaxWidth
