@@ -12,6 +12,7 @@ firebaseFirestoreKtx = "25.0.0"
 firebaseDatabaseKtx = "21.0.0"
 googleGmsGoogleServices = "4.4.2"
 firebaseDatabase = "21.0.0"
+material3Android = "1.2.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
