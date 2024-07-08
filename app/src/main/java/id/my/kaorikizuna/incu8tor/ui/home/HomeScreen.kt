@@ -56,6 +56,7 @@ fun HomeScreen() {
         setDevices(it)
         Log.d("devices", "${devices.toString()} ${it.size}")
     })
+
     Scaffold(topBar = {
         Incu8torSearchBar(::onSearchClicked)
     }, floatingActionButton = {

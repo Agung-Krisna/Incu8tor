@@ -72,5 +72,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(platform("com.google.firebase:firebase-bom:33.1.1"))
     implementation("com.google.firebase:firebase-analytics")
+    implementation "androidx.compose.material3:material3:1.0.1"
+    }
 
 }
