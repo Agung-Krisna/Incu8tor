@@ -82,7 +82,7 @@ import id.my.kaorikizuna.incu8tor.ui.theme.Red
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddDeviceScreen(navController: NavController, onSave: (DeviceDetail) -> Unit) {
+fun AddDeviceScreen(onSave: (DeviceDetail) -> Unit, onBackClicked: () -> Unit) {
 
     val (deviceDetail, setDeviceDetail) = remember { mutableStateOf(DeviceDetail()) }
     Scaffold(
@@ -90,7 +90,7 @@ fun AddDeviceScreen(navController: NavController, onSave: (DeviceDetail) -> Unit
             Incu8torModifiableTopBar(
                 deviceTitle = "Incu8tor",
                 actionButton = {},
-                backNavigation = { navController.navigate("home") })
+                backNavigation = { onBackClicked() })
         }
     ) { paddingValues ->
         Column(
@@ -214,9 +214,10 @@ fun AddDeviceScreen(navController: NavController, onSave: (DeviceDetail) -> Unit
                 verticalArrangement = Arrangement.Bottom,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                ElevatedButton(onClick = {
+                Button(onClick = {
                     Log.w("asdfasdf", "$deviceDetail")
                     onSave(deviceDetail)
+                    onBackClicked()
                 }) {
                     Text(text = "Save")
                 }

@@ -23,10 +23,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import id.my.kaorikizuna.incu8tor.R
 import id.my.kaorikizuna.incu8tor.model.Device
 import id.my.kaorikizuna.incu8tor.model.DeviceDetail
 import id.my.kaorikizuna.incu8tor.ui.components.Incu8torSearchBar
@@ -45,7 +48,7 @@ val devices = listOf(
 )
 
 @Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen(navController: NavController, onDeviceClicked: (DeviceDetail) -> Unit) {
     val viewModel = DeviceViewModel()
 
 //  turns out that the second positional argument of remember is the setter function,
@@ -89,7 +92,8 @@ fun HomeScreen(navController: NavController) {
                 items(devices) { device ->
                     DeviceCard(
                         device,
-                        onClick = { navController.navigate("deviceConfiguration/${device.macAddress}") })
+                        onClick = { onDeviceClicked(device) }
+                    )
                 }
             }
         }
@@ -117,15 +121,17 @@ fun DeviceCard(deviceDetail: DeviceDetail, onClick: () -> Unit) {
                     style = MaterialTheme.typography.bodySmall
                 )
             }
-//            TODO fix to tell if the device is connected or not
             // the icon needs to be within a container (box or row) to be able to be centered vertically
-//            Row(modifier = Modifier.align(Alignment.CenterVertically)) {
-//                Icon(
-//                    painter = if (deviceDetail.isConnected) painterResource(id = R.drawable.wifi)
-//                    else painterResource(id = R.drawable.wifi_off),
-//                    contentDescription = "Device Connected",
-//                )
-//            }
+            // device is online if it can report temperature and humidity
+            Row(modifier = Modifier.align(Alignment.CenterVertically)) {
+                Icon(
+                    painter = if (deviceDetail.sensors.humidity > 0 && deviceDetail.sensors.temperature > 0) painterResource(
+                        id = R.drawable.wifi
+                    )
+                    else painterResource(id = R.drawable.wifi_off),
+                    contentDescription = "Device Connected",
+                )
+            }
         }
     }
 }

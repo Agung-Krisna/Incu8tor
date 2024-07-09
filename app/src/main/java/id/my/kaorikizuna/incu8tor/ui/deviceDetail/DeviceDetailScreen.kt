@@ -22,6 +22,7 @@ import id.my.kaorikizuna.incu8tor.viewmodel.DeviceViewModel
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.navigation.NavController
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -31,11 +32,21 @@ import androidx.compose.material3.OutlinedCard as OutlinedCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DeviceDetailScreen(deviceDetail: DeviceDetail, onBackClicked: () -> Unit, onSettingsClicked: () -> Unit) {
+fun DeviceDetailScreen(
+    deviceDetail: DeviceDetail,
+    onBackClicked: () -> Unit,
+    onSettingsClicked: () -> Unit,
+    onIncubationClicked: (DeviceDetail) -> Unit
+) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = deviceDetail.deviceName, style = MaterialTheme.typography.titleSmall) },
+                title = {
+                    Text(
+                        text = deviceDetail.deviceName,
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = { onBackClicked() }) {
                         Icon(
@@ -161,10 +172,10 @@ fun DeviceDetailScreen(deviceDetail: DeviceDetail, onBackClicked: () -> Unit, on
 
                 Spacer(modifier = Modifier.weight(1f))
                 Button(
-                    onClick = { /* TODO: Implement action */ },
+                    onClick = { onIncubationClicked(deviceDetail) },
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 ) {
-                    Text(text = "End Incubation")
+                    if (deviceDetail.dayStart == 0L) Text("Start Incubation") else Text("End Incubation")
                 }
             }
         }
@@ -172,30 +183,21 @@ fun DeviceDetailScreen(deviceDetail: DeviceDetail, onBackClicked: () -> Unit, on
 }
 
 fun calculateDaysBetween(startDateEpoch: Long): Long {
+    if (startDateEpoch == 0L) {
+        return 0
+    }
     val currentDate = LocalDate.now()
     val startDate = LocalDate.ofEpochDay(startDateEpoch / (24 * 60 * 60))
     return ChronoUnit.DAYS.between(startDate, currentDate)
 }
 
 fun getDateFromEpoch(epochTime: Long): String {
-    return SimpleDateFormat("dd MMMM yyyy, HH:mm", Locale.getDefault()).format(Date(epochTime * 1000))
-}
+    if (epochTime == 0L) {
+        return "Not Yet Started"
+    }
+    return SimpleDateFormat(
+        "dd MMMM yyyy, HH:mm",
+        Locale.getDefault()
+    ).format(Date(epochTime * 1000))
 
-@Preview(showBackground = true)
-@Composable
-fun DeviceDetailScreenPreview() {
-    val viewModel = DeviceViewModel()
-    val (deviceDetail, setDeviceDetail) = remember { mutableStateOf(DeviceDetail()) }
-    LaunchedEffect(Unit) {
-        viewModel.getDevice("24:DC:C3:45:EA:CC", onSuccess = {
-            setDeviceDetail(it)
-        })
-    }
-    Incu8torTheme {
-        DeviceDetailScreen(
-            deviceDetail = deviceDetail,
-            onBackClicked = { /* Preview action */ },
-            onSettingsClicked = { /* Preview action */ }
-        )
-    }
 }

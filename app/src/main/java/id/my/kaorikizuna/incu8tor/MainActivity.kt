@@ -11,16 +11,19 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import id.my.kaorikizuna.incu8tor.model.DeviceDetail
 import id.my.kaorikizuna.incu8tor.ui.addevice.AddDeviceScreen
 import id.my.kaorikizuna.incu8tor.ui.deviceConfiguration.DeviceConfigurationScreen
+import id.my.kaorikizuna.incu8tor.ui.deviceDetail.DeviceDetailScreen
 import id.my.kaorikizuna.incu8tor.ui.home.HomeScreen
 import id.my.kaorikizuna.incu8tor.ui.theme.Incu8torTheme
 import id.my.kaorikizuna.incu8tor.viewmodel.DeviceViewModel
 
+// TODO add the search functionality on home screen
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,36 +31,21 @@ class MainActivity : ComponentActivity() {
         setContent {
             Incu8torTheme {
                 val viewModel = DeviceViewModel()
-                val deviceDetail = viewModel.getDevice("24:DC:C3:45:EA:CC")
-//                Log.d(TAG, "device: ${deviceDetail.toString()}")
-//                DeviceConfigurationScreenPreview()
-//                HomeScreen()
+                val navController = rememberNavController()
 
-                // testing purposes
-//                val (deviceDetail, setDeviceDetail) = remember { mutableStateOf(DeviceDetail()) }
-//                LaunchedEffect(Unit) {
-//                    viewModel.getDevice("24:DC:C3:45:EA:CC", onSuccess = {
-//                        setDeviceDetail(it)
-//                    })
-//                }
-//                if (deviceDetail != DeviceDetail()) {
-//                    DeviceConfigurationScreen(
-//                        deviceDetail = deviceDetail,
-//                        onUpdate = { deviceDetail -> viewModel.updateDevice(deviceDetail) },
-//                        onDelete = { deviceDetail -> viewModel.deleteDevice(deviceDetail) },)
-//                }
-
-//                AddDeviceScreen(onSave = { deviceDetail ->
-//                    viewModel.addDevice(deviceDetail)
-//                })
                 NavHost(navController = navController, startDestination = "home") {
                     composable(route = "home") {
-                        HomeScreen(navController)
+                        HomeScreen(
+                            onDeviceClicked = { deviceDetail -> navController.navigate("deviceDetail/${deviceDetail.macAddress}") },
+                            navController = navController
+                        )
                     }
                     composable(route = "addDevice") {
-                        AddDeviceScreen(navController = navController, onSave = { deviceDetail ->
-                            viewModel.addDevice(deviceDetail)
-                        })
+                        AddDeviceScreen(
+                            onBackClicked = { navController.navigate("home") },
+                            onSave = { deviceDetail ->
+                                viewModel.addDevice(deviceDetail)
+                            })
                     }
                     composable(route = "deviceConfiguration/{macAddress}") { backStackEntry ->
                         val macAddress = backStackEntry.arguments?.getString("macAddress")
@@ -70,16 +58,17 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                         if (deviceDetail != DeviceDetail()) {
-                            DeviceConfigurationScreen(
-                                navController = navController,
-                                deviceDetail = deviceDetail,
+                            DeviceConfigurationScreen(deviceDetail = deviceDetail,
                                 onUpdate = { deviceDetail ->
                                     viewModel.updateDevice(deviceDetail)
                                 },
                                 onDelete = { deviceDetail ->
                                     viewModel.deleteDevice(deviceDetail)
-                                }
-                            )
+                                    navController.navigate("home")
+                                },
+                                onBackClicked = {
+                                    navController.navigate("deviceDetail/${deviceDetail.macAddress}")
+                                })
                         }
                     }
                     composable(route = "deviceDetail/{macAddress}") { backStackEntry ->
@@ -91,6 +80,21 @@ class MainActivity : ComponentActivity() {
                                     setDeviceDetail(it)
                                 })
                             }
+                        }
+                        if (deviceDetail != DeviceDetail()) {
+                            DeviceDetailScreen(deviceDetail = deviceDetail,
+                                onBackClicked = { navController.navigate("home") },
+                                onSettingsClicked = { navController.navigate("deviceConfiguration/${deviceDetail.macAddress}") },
+                                onIncubationClicked = { deviceDetail ->
+                                    // if incubation has already begun, end incubation
+                                    if (deviceDetail.dayStart > 0) {
+                                        viewModel.updateDevice(deviceDetail.copy(dayStart = 0))
+                                    // else, start the incubation
+                                    } else {
+                                        viewModel.updateDevice(deviceDetail.copy(dayStart = System.currentTimeMillis() / 1000))
+                                    }
+                                    navController.navigate("home")
+                                })
                         }
                     }
 

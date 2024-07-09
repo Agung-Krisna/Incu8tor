@@ -60,10 +60,10 @@ import id.my.kaorikizuna.incu8tor.viewmodel.DeviceViewModel
 
 @Composable
 fun DeviceConfigurationScreen(
-    navController: NavController,
     deviceDetail: DeviceDetail,
     onUpdate: (DeviceDetail) -> Unit,
-    onDelete: (DeviceDetail) -> Unit
+    onDelete: (DeviceDetail) -> Unit,
+    onBackClicked: () -> Unit
 ) {
     val (currentDeviceDetail, setCurrentDeviceDetail) = remember { mutableStateOf(deviceDetail) }
     var showDialog by remember { mutableStateOf(false) }
@@ -79,8 +79,8 @@ fun DeviceConfigurationScreen(
         DeleteDialog(
             onDismiss = { showDialog = false },
             onConfirm = {
-                onDelete(deviceDetail)
                 showDialog = false
+                onDelete(deviceDetail)
             })
     }
 
@@ -95,7 +95,8 @@ fun DeviceConfigurationScreen(
                     )
                 }
             },
-            backNavigation = { navController.navigate("home") })
+            backNavigation = onBackClicked
+        )
     })
     { paddingValues ->
         Column(
@@ -200,7 +201,10 @@ fun DeviceConfigurationScreen(
                 verticalArrangement = Arrangement.Bottom,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                ElevatedButton(onClick = { onUpdate(currentDeviceDetail) }) {
+                Button(onClick = {
+                    onUpdate(currentDeviceDetail)
+                    onBackClicked()
+                }) {
                     Text(
                         text = "Update",
                         style = MaterialTheme.typography.bodyLarge,
