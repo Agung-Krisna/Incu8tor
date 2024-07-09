@@ -2,6 +2,8 @@ package id.my.kaorikizuna.incu8tor.model
 
 import com.google.firebase.database.PropertyName
 
+import androidx.lifecycle.ViewModel
+
 data class Device(var name: String, var macAddress: String, var isConnected: Boolean)
 
 data class Humidity(
