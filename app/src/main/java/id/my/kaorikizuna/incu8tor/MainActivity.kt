@@ -23,8 +23,8 @@ class MainActivity : ComponentActivity() {
 //                val viewModel = DeviceViewModel()
 //                val deviceDetail = viewModel.getDevice("24:DC:C3:45:EA:CC")
 //                Log.d(TAG, "device: ${deviceDetail.toString()}")
-//                DeviceConfigurationScreen(deviceDetail)
-                HomeScreen()
+                DeviceConfigurationScreenPreview()
+//                HomeScreen()
             }
         }
     }

@@ -60,17 +60,38 @@ import id.my.kaorikizuna.incu8tor.viewmodel.DeviceViewModel
 @Composable
 fun DeviceConfigurationScreen(deviceDetail: DeviceDetail) {
     val (currentDeviceDetail, setCurrentDeviceDetail) = remember { mutableStateOf(deviceDetail) }
+    val viewModel = DeviceViewModel()
+    var showDialog by remember { mutableStateOf(false) }
 //  HAHA HA GOT 'EM
     LaunchedEffect(deviceDetail) {
         if (currentDeviceDetail == DeviceDetail()) {
             setCurrentDeviceDetail(deviceDetail)
         }
     }
-    Scaffold(topBar = {
-        Incu8torModifiableTopBar(deviceTitle = deviceDetail.deviceName,
-            actionButton = { DeleteActionButton() })
-    }) { paddingValues ->
 
+    // state hoisting, show dialog only when showDialog is true
+    if (showDialog) {
+        DeleteDialog(
+            onDismiss = { showDialog = false },
+            onConfirm = {
+                viewModel.deleteDevice(currentDeviceDetail)
+                showDialog = false
+            })
+    }
+
+
+    Scaffold(topBar = {
+        Incu8torModifiableTopBar(
+            deviceTitle = deviceDetail.deviceName,
+            actionButton = {
+                IconButton(onClick = { showDialog = true }) {
+                    Icon(
+                        imageVector = Icons.Filled.Delete, contentDescription = "Delete"
+                    )
+                }
+            })
+    })
+    { paddingValues ->
         Column(
             modifier = Modifier
                 .padding(paddingValues)
@@ -173,7 +194,6 @@ fun DeviceConfigurationScreen(deviceDetail: DeviceDetail) {
                 verticalArrangement = Arrangement.Bottom,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                val viewModel = DeviceViewModel()
                 ElevatedButton(onClick = {
                     viewModel.updateDevice(
                         device = currentDeviceDetail,
@@ -191,19 +211,6 @@ fun DeviceConfigurationScreen(deviceDetail: DeviceDetail) {
 }
 
 @Composable
-fun DeleteActionButton() {
-    var showDialog by remember { mutableStateOf(false) }
-    if (showDialog) {
-        DeleteDialog(onDismiss = { showDialog = false })
-    }
-    IconButton(onClick = { showDialog = true }) {
-        Icon(
-            imageVector = Icons.Filled.Delete, contentDescription = "Delete"
-        )
-    }
-}
-
-@Composable
 fun AnimatedTextError(visible: Boolean, text: String) {
     val density = LocalDensity.current
     AnimatedVisibility(visible = visible, enter = slideInVertically {
@@ -216,7 +223,7 @@ fun AnimatedTextError(visible: Boolean, text: String) {
 }
 
 @Composable
-fun DeleteDialog(onDismiss: () -> Unit) {
+fun DeleteDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
     AlertDialog(icon = {
         Icon(Icons.Filled.Delete, contentDescription = "Delete Device")
     }, onDismissRequest = onDismiss, title = {
@@ -224,7 +231,7 @@ fun DeleteDialog(onDismiss: () -> Unit) {
     }, text = {
         Text(text = "Are you sure you want to delete this device?")
     }, confirmButton = {
-        TextButton(onClick = { /*TODO*/ }) {
+        TextButton(onClick = onConfirm) {
             Text("Confirm")
         }
     }, dismissButton = {
