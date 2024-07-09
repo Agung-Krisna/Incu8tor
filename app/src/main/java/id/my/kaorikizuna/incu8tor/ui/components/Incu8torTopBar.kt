@@ -32,6 +32,7 @@ import id.my.kaorikizuna.incu8tor.R
 
 
 // title changed if searching or not
+// TODO implement this
 fun onSearchClicked(searchTitle: String) {
     println("Searched for $searchTitle")
 }
