@@ -72,7 +72,7 @@ fun Incu8torSearchBar(onSearchClicked: (String) -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Incu8torModifiableTopBar(
-    deviceTitle: String, actionButton: (@Composable RowScope.() -> Unit)
+    deviceTitle: String, actionButton: (@Composable RowScope.() -> Unit), backNavigation: () -> Unit
 ) {
     CenterAlignedTopAppBar(title = {
         Text(
@@ -82,7 +82,7 @@ fun Incu8torModifiableTopBar(
             style = MaterialTheme.typography.titleMedium
         )
     }, navigationIcon = {
-        IconButton(onClick = { /*TODO*/ }) {
+        IconButton(onClick = backNavigation) {
             Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "Back")
         }
     }, actions = actionButton

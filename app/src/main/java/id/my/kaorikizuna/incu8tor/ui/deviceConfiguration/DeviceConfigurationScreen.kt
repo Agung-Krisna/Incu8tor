@@ -46,6 +46,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import id.my.kaorikizuna.incu8tor.model.DeviceDetail
 import id.my.kaorikizuna.incu8tor.model.DeviceSettings
 import id.my.kaorikizuna.incu8tor.model.Humidity
@@ -59,12 +60,12 @@ import id.my.kaorikizuna.incu8tor.viewmodel.DeviceViewModel
 
 @Composable
 fun DeviceConfigurationScreen(
+    navController: NavController,
     deviceDetail: DeviceDetail,
     onUpdate: (DeviceDetail) -> Unit,
     onDelete: (DeviceDetail) -> Unit
 ) {
     val (currentDeviceDetail, setCurrentDeviceDetail) = remember { mutableStateOf(deviceDetail) }
-    val viewModel = DeviceViewModel()
     var showDialog by remember { mutableStateOf(false) }
 //  HAHA HA GOT 'EM
     LaunchedEffect(deviceDetail) {
@@ -93,7 +94,8 @@ fun DeviceConfigurationScreen(
                         imageVector = Icons.Filled.Delete, contentDescription = "Delete"
                     )
                 }
-            })
+            },
+            backNavigation = { navController.navigate("home") })
     })
     { paddingValues ->
         Column(

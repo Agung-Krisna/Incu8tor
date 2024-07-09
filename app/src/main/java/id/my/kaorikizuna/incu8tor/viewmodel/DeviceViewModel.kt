@@ -46,7 +46,8 @@ class DeviceViewModel : ViewModel() {
     }
 
     fun addDevice(device: DeviceDetail, onSuccess: () -> Unit = {}) {
-        devicesReference.child(device.macAddress).setValue(device)
+        device.active = true
+        devicesReference.child(device.macAddress).updateChildren(device.toMap())
     }
 
     fun updateDevice(device: DeviceDetail, onSuccess: () -> Unit = {}) {

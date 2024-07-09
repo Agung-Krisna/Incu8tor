@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import id.my.kaorikizuna.incu8tor.model.Device
 import id.my.kaorikizuna.incu8tor.model.DeviceDetail
 import id.my.kaorikizuna.incu8tor.ui.components.Incu8torSearchBar
@@ -44,7 +45,7 @@ val devices = listOf(
 )
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(navController: NavController) {
     val viewModel = DeviceViewModel()
 
 //  turns out that the second positional argument of remember is the setter function,
@@ -62,7 +63,7 @@ fun HomeScreen() {
         Incu8torSearchBar(::onSearchClicked)
     }, floatingActionButton = {
         FloatingActionButton(
-            onClick = { /*TODO*/ },
+            onClick = { navController.navigate("addDevice") },
             modifier = Modifier.offset(x = (-25).dp, y = (-30).dp)
         ) {
             Icon(
@@ -86,7 +87,9 @@ fun HomeScreen() {
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(devices) { device ->
-                    DeviceCard(device)
+                    DeviceCard(
+                        device,
+                        onClick = { navController.navigate("deviceConfiguration/${device.macAddress}") })
                 }
             }
         }
@@ -96,8 +99,8 @@ fun HomeScreen() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DeviceCard(deviceDetail: DeviceDetail) {
-    OutlinedCard(onClick = { /*TODO*/ }, modifier = Modifier.padding(horizontal = 10.dp)) {
+fun DeviceCard(deviceDetail: DeviceDetail, onClick: () -> Unit) {
+    OutlinedCard(onClick = onClick, modifier = Modifier.padding(horizontal = 10.dp)) {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier

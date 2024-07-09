@@ -70,6 +70,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
 
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import id.my.kaorikizuna.incu8tor.model.DeviceDetail
 import id.my.kaorikizuna.incu8tor.model.DeviceSettings
 import id.my.kaorikizuna.incu8tor.model.Humidity
@@ -81,13 +82,15 @@ import id.my.kaorikizuna.incu8tor.ui.theme.Red
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddDeviceScreen(onSave: (DeviceDetail) -> Unit) {
+fun AddDeviceScreen(navController: NavController, onSave: (DeviceDetail) -> Unit) {
 
-    val deviceDetail by remember { mutableStateOf(DeviceDetail()) }
-
+    val (deviceDetail, setDeviceDetail) = remember { mutableStateOf(DeviceDetail()) }
     Scaffold(
         topBar = {
-            Incu8torModifiableTopBar(deviceTitle = "Incu8tor", actionButton = {})
+            Incu8torModifiableTopBar(
+                deviceTitle = "Incu8tor",
+                actionButton = {},
+                backNavigation = { navController.navigate("home") })
         }
     ) { paddingValues ->
         Column(
@@ -101,7 +104,8 @@ fun AddDeviceScreen(onSave: (DeviceDetail) -> Unit) {
             OutlinedTextField(
                 value = deviceDetail.deviceName,
                 onValueChange = {
-                    deviceDetail.deviceName = it
+                    setDeviceDetail(deviceDetail.copy(deviceName = it))
+//                    deviceDetail.deviceName = it
                 },
                 label = { Text("Input Device Name") },
                 modifier = Modifier.fillMaxWidth()
@@ -110,7 +114,8 @@ fun AddDeviceScreen(onSave: (DeviceDetail) -> Unit) {
             OutlinedTextField(
                 value = deviceDetail.macAddress,
                 onValueChange = {
-                    deviceDetail.macAddress = it
+                    setDeviceDetail(deviceDetail.copy(macAddress = it))
+//                    deviceDetail.macAddress = it
                 },
                 label = { Text("Input MAC Address") },
                 modifier = Modifier.fillMaxWidth()
@@ -119,14 +124,29 @@ fun AddDeviceScreen(onSave: (DeviceDetail) -> Unit) {
 
             // set the device to be in valid range
             deviceDetail.settings =
-                DeviceSettings(temperature = Temperature(30, 40), humidity = Humidity(30, 80))
+                DeviceSettings(temperature = Temperature(34, 38), humidity = Humidity(50, 70))
 
             var temperatureSliderPositions by remember { mutableStateOf(deviceDetail.settings.temperature.min.toFloat()..deviceDetail.settings.temperature.max.toFloat()) }
             Column {
                 Text("Temperature")
                 RangeSlider(
                     value = temperatureSliderPositions,
-                    onValueChange = { temperatureSliderPositions = it },
+                    onValueChange = {
+                        temperatureSliderPositions = it
+
+                        setDeviceDetail(
+                            deviceDetail.copy(
+                                settings = DeviceSettings(
+                                    temperature = Temperature(
+                                        temperatureSliderPositions.start.toInt(),
+                                        temperatureSliderPositions.endInclusive.toInt()
+                                    ),
+                                    humidity = deviceDetail.settings.humidity
+                                )
+                            )
+                        )
+//                        temperatureSliderPositions = it
+                    },
                     valueRange = 30f..40f,
                     colors = SliderDefaults.colors(
                         inactiveTrackColor = DarkRed,
@@ -153,7 +173,20 @@ fun AddDeviceScreen(onSave: (DeviceDetail) -> Unit) {
                 Text("Humidity")
                 RangeSlider(
                     value = humiditySliderPositions,
-                    onValueChange = { humiditySliderPositions = it },
+                    onValueChange = {
+                        humiditySliderPositions = it
+                        setDeviceDetail(
+                            deviceDetail.copy(
+                                settings = DeviceSettings(
+                                    temperature = deviceDetail.settings.temperature,
+                                    humidity = Humidity(
+                                        humiditySliderPositions.start.toInt(),
+                                        humiditySliderPositions.endInclusive.toInt()
+                                    )
+                                )
+                            )
+                        )
+                    },
                     valueRange = 30f..80f,
                     colors = SliderDefaults.colors(
                         inactiveTrackColor = DarkBlue,
@@ -181,17 +214,14 @@ fun AddDeviceScreen(onSave: (DeviceDetail) -> Unit) {
                 verticalArrangement = Arrangement.Bottom,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                ElevatedButton(onClick = { onSave(deviceDetail) }) {
+                ElevatedButton(onClick = {
+                    Log.w("asdfasdf", "$deviceDetail")
+                    onSave(deviceDetail)
+                }) {
                     Text(text = "Save")
                 }
             }
 
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun AddDeviceScreenPreview() {
-    AddDeviceScreen(onSave = {})
 }
