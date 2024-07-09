@@ -41,6 +41,7 @@ data class DeviceDetail(
     var macAddress: String,
     var settings: DeviceSettings,
     var sensors: DeviceSensors,
+    var isActive: Boolean
 ) {
     constructor() : this(
         false,
@@ -49,5 +50,6 @@ data class DeviceDetail(
         "",
         DeviceSettings(Humidity(0, 0), Temperature(0, 0)),
         DeviceSensors(0, 0),
+        false
     )
 }

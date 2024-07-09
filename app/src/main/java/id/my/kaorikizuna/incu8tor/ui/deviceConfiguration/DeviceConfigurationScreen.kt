@@ -2,6 +2,12 @@ package id.my.kaorikizuna.incu8tor.ui.deviceConfiguration
 
 import android.content.ContentValues.TAG
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOut
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
@@ -23,9 +30,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SliderColors
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.currentCompositionErrors
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,9 +42,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import id.my.kaorikizuna.incu8tor.model.DeviceDetail
+import id.my.kaorikizuna.incu8tor.model.DeviceSettings
+import id.my.kaorikizuna.incu8tor.model.Humidity
+import id.my.kaorikizuna.incu8tor.model.Temperature
 import id.my.kaorikizuna.incu8tor.ui.components.Incu8torModifiableTopBar
 import id.my.kaorikizuna.incu8tor.ui.theme.Blue
 import id.my.kaorikizuna.incu8tor.ui.theme.DarkBlue
@@ -46,20 +60,14 @@ import id.my.kaorikizuna.incu8tor.viewmodel.DeviceViewModel
 @Composable
 fun DeviceConfigurationScreen(deviceDetail: DeviceDetail) {
     val (currentDeviceDetail, setCurrentDeviceDetail) = remember { mutableStateOf(deviceDetail) }
-//    HAHA HA GOT 'EM
-//    if (currentDeviceDetail == DeviceDetail()) {
-//        setCurrentDeviceDetail(deviceDetail)
-//    }
+//  HAHA HA GOT 'EM
     LaunchedEffect(deviceDetail) {
         if (currentDeviceDetail == DeviceDetail()) {
             setCurrentDeviceDetail(deviceDetail)
         }
     }
-
-
     Scaffold(topBar = {
-        Incu8torModifiableTopBar(
-            deviceTitle = deviceDetail.deviceName,
+        Incu8torModifiableTopBar(deviceTitle = deviceDetail.deviceName,
             actionButton = { DeleteActionButton() })
     }) { paddingValues ->
 
@@ -69,28 +77,41 @@ fun DeviceConfigurationScreen(deviceDetail: DeviceDetail) {
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-////        TODO: create an empty text validation
-            OutlinedTextField(
-                value = currentDeviceDetail.deviceName,
+            OutlinedTextField(value = currentDeviceDetail.deviceName,
                 onValueChange = {
                     setCurrentDeviceDetail(currentDeviceDetail.copy(deviceName = it))
                 },
                 label = { Text("Change Device Name") },
                 modifier = Modifier.fillMaxWidth(),
                 maxLines = 1,
-                singleLine = true
-            )
+                singleLine = true,
+                supportingText = {
+                    AnimatedTextError(
+                        visible = currentDeviceDetail.deviceName.isEmpty(),
+                        text = "Device Name cannot be empty!"
+                    )
+                })
 
             var temperatureSliderPositions by remember { mutableStateOf(currentDeviceDetail.settings.temperature.min.toFloat()..currentDeviceDetail.settings.temperature.max.toFloat()) }
             Column {
                 Text("Temperature")
                 RangeSlider(
-                    value = temperatureSliderPositions,
-                    onValueChange = { temperatureSliderPositions = it },
-                    valueRange = 20f..50f,
-                    colors = SliderDefaults.colors(
-                        inactiveTrackColor = DarkRed,
-                        activeTrackColor = Red
+                    value = temperatureSliderPositions, onValueChange = { it ->
+                        temperatureSliderPositions = it
+
+                        // set the temperature while using the humidity from the currently saved result
+                        setCurrentDeviceDetail(
+                            currentDeviceDetail.copy(
+                                settings = DeviceSettings(
+                                    temperature = Temperature(
+                                        temperatureSliderPositions.start.toInt(),
+                                        temperatureSliderPositions.endInclusive.toInt()
+                                    ), humidity = currentDeviceDetail.settings.humidity
+                                )
+                            )
+                        )
+                    }, valueRange = 30f..40f, colors = SliderDefaults.colors(
+                        inactiveTrackColor = DarkRed, activeTrackColor = Red
                     )
                 )
                 Row(
@@ -112,12 +133,23 @@ fun DeviceConfigurationScreen(deviceDetail: DeviceDetail) {
             Column {
                 Text("Humidity")
                 RangeSlider(
-                    value = humiditySliderPositions,
-                    onValueChange = { humiditySliderPositions = it },
-                    valueRange = 30f..80f,
-                    colors = SliderDefaults.colors(
-                        inactiveTrackColor = DarkBlue,
-                        activeTrackColor = Blue
+                    value = humiditySliderPositions, onValueChange = { it ->
+                        humiditySliderPositions = it
+
+                        // set the humidity while keeping the temperature from the saved result
+                        setCurrentDeviceDetail(
+                            currentDeviceDetail.copy(
+                                settings = DeviceSettings(
+                                    temperature = currentDeviceDetail.settings.temperature,
+                                    humidity = Humidity(
+                                        humiditySliderPositions.start.toInt(),
+                                        humiditySliderPositions.endInclusive.toInt()
+                                    )
+                                )
+                            )
+                        )
+                    }, valueRange = 30f..80f, colors = SliderDefaults.colors(
+                        inactiveTrackColor = DarkBlue, activeTrackColor = Blue
                     )
                 )
                 Row(
@@ -141,26 +173,69 @@ fun DeviceConfigurationScreen(deviceDetail: DeviceDetail) {
                 verticalArrangement = Arrangement.Bottom,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                ElevatedButton(onClick = { /*TODO*/ }) {
-                    Text(text = "Update")
+                val viewModel = DeviceViewModel()
+                ElevatedButton(onClick = {
+                    viewModel.updateDevice(
+                        device = currentDeviceDetail,
+                    )
+                }) {
+                    Text(
+                        text = "Update",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
-
         }
     }
 }
 
 @Composable
 fun DeleteActionButton() {
-    IconButton(onClick = { /*TODO*/ }) {
+    var showDialog by remember { mutableStateOf(false) }
+    if (showDialog) {
+        DeleteDialog(onDismiss = { showDialog = false })
+    }
+    IconButton(onClick = { showDialog = true }) {
         Icon(
             imageVector = Icons.Filled.Delete, contentDescription = "Delete"
         )
     }
 }
 
+@Composable
+fun AnimatedTextError(visible: Boolean, text: String) {
+    val density = LocalDensity.current
+    AnimatedVisibility(visible = visible, enter = slideInVertically {
+        with(density) { -10.dp.roundToPx() }
+    } + fadeIn(initialAlpha = 0.3f), exit = slideOutVertically() + fadeOut()) {
+        Text(
+            text = text, color = MaterialTheme.colorScheme.error
+        )
+    }
+}
 
-@Preview
+@Composable
+fun DeleteDialog(onDismiss: () -> Unit) {
+    AlertDialog(icon = {
+        Icon(Icons.Filled.Delete, contentDescription = "Delete Device")
+    }, onDismissRequest = onDismiss, title = {
+        Text(text = "Delete Device")
+    }, text = {
+        Text(text = "Are you sure you want to delete this device?")
+    }, confirmButton = {
+        TextButton(onClick = { /*TODO*/ }) {
+            Text("Confirm")
+        }
+    }, dismissButton = {
+        TextButton(onClick = onDismiss) {
+            Text("Cancel")
+        }
+    })
+}
+
+
+//@Preview
 @Composable
 fun DeviceConfigurationScreenPreview() {
     val viewModel = DeviceViewModel()

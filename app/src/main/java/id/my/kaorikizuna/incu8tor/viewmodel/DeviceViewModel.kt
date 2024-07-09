@@ -2,7 +2,6 @@ package id.my.kaorikizuna.incu8tor.viewmodel
 
 import android.content.ContentValues.TAG
 import android.util.Log
-import androidx.compose.runtime.Composable
 import androidx.lifecycle.ViewModel
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -30,10 +29,11 @@ class DeviceViewModel : ViewModel() {
                 // get data from snapshot
                 for (deviceSnapshot in snapshot.children) {
                     val device = deviceSnapshot.getValue(DeviceDetail::class.java)
-                    if (device != null) {
+                    Log.w("TAG", "added device $device")
+                    if (device != null && device.isActive) {
                         devices.add(device)
-                        Log.d(TAG, "onDataChange: $device")
                     }
+
                 }
                 return onSuccess(devices)
             }
@@ -45,12 +45,13 @@ class DeviceViewModel : ViewModel() {
         })
     }
 
-    fun addDevice(macAddress: String, device: DeviceDetail, onSuccess: () -> Unit) {
-        devicesReference.child(macAddress).setValue(device)
+    fun addDevice(device: DeviceDetail, onSuccess: () -> Unit = {}) {
+        devicesReference.child(device.macAddress).setValue(device)
     }
 
-    fun updateDevice(macAddress: String, device: DeviceDetail, onSuccess: () -> Unit) {
-        devicesReference.child(macAddress).setValue(device)
+    fun updateDevice(device: DeviceDetail, onSuccess: () -> Unit = {}) {
+        device.hasUpdate = true
+        devicesReference.child(device.macAddress).setValue(device)
     }
 
     fun getDevice(macAddress: String, onSuccess: (DeviceDetail) -> Unit) {
@@ -60,5 +61,10 @@ class DeviceViewModel : ViewModel() {
             Log.d(TAG, "getDevice: $device")
             onSuccess(device)
         }
+    }
+
+    fun deleteDevice(device: DeviceDetail) {
+        device.isActive = false
+        devicesReference.child(device.macAddress).setValue(device)
     }
 }

@@ -24,7 +24,7 @@ class MainActivity : ComponentActivity() {
 //                val deviceDetail = viewModel.getDevice("24:DC:C3:45:EA:CC")
 //                Log.d(TAG, "device: ${deviceDetail.toString()}")
 //                DeviceConfigurationScreen(deviceDetail)
-                DeviceConfigurationScreenPreview()
+                HomeScreen()
             }
         }
     }
