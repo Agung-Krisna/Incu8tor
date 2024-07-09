@@ -1,6 +1,6 @@
 package id.my.kaorikizuna.incu8tor.model
 
-import androidx.compose.runtime.Updater
+import com.google.firebase.database.PropertyName
 
 data class Device(var name: String, var macAddress: String, var isConnected: Boolean)
 
@@ -35,21 +35,64 @@ data class DeviceSensors(
 }
 
 data class DeviceDetail(
+    @PropertyName("-hasUpdate")
     var hasUpdate: Boolean,
     var dayStart: Long,
     var deviceName: String,
+    var active: Boolean,
     var macAddress: String,
     var settings: DeviceSettings,
     var sensors: DeviceSensors,
-    var isActive: Boolean
 ) {
     constructor() : this(
         false,
         0,
         "",
+        false,
         "",
         DeviceSettings(Humidity(0, 0), Temperature(0, 0)),
         DeviceSensors(0, 0),
-        false
+    )
+}
+
+// making a map of the DeviceDetail data class to be serializable for transfer
+// using .updateChildren() method
+fun DeviceDetail.toMap(): Map<String, Any> {
+    return mapOf(
+        "hasUpdate" to hasUpdate,
+        "dayStart" to dayStart,
+        "deviceName" to deviceName,
+        "active" to active,
+        "macAddress" to macAddress,
+        "settings" to settings.toMap(),
+        "sensors" to sensors.toMap()
+    )
+}
+
+fun DeviceSettings.toMap(): Map<String, Any> {
+    return mapOf(
+        "humidity" to humidity.toMap(),
+        "temperature" to temperature.toMap()
+    )
+}
+
+fun DeviceSensors.toMap(): Map<String, Any> {
+    return mapOf(
+        "humidity" to humidity,
+        "temperature" to temperature
+    )
+}
+
+fun Humidity.toMap(): Map<String, Any> {
+    return mapOf(
+        "min" to min,
+        "max" to max
+    )
+}
+
+fun Temperature.toMap(): Map<String, Any> {
+    return mapOf(
+        "min" to min,
+        "max" to max
     )
 }

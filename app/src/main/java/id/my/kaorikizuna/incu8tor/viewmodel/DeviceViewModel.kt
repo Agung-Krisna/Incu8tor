@@ -7,8 +7,8 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import id.my.kaorikizuna.incu8tor.model.Device
 import id.my.kaorikizuna.incu8tor.model.DeviceDetail
+import id.my.kaorikizuna.incu8tor.model.toMap
 
 
 class DeviceViewModel : ViewModel() {
@@ -29,8 +29,8 @@ class DeviceViewModel : ViewModel() {
                 // get data from snapshot
                 for (deviceSnapshot in snapshot.children) {
                     val device = deviceSnapshot.getValue(DeviceDetail::class.java)
-                    Log.w("TAG", "added device $device")
-                    if (device != null && device.isActive) {
+                    if (device != null && device.active) {
+                        device.macAddress = deviceSnapshot.key.toString()
                         devices.add(device)
                     }
 
@@ -51,20 +51,22 @@ class DeviceViewModel : ViewModel() {
 
     fun updateDevice(device: DeviceDetail, onSuccess: () -> Unit = {}) {
         device.hasUpdate = true
-        devicesReference.child(device.macAddress).setValue(device)
+        devicesReference.child(device.macAddress).updateChildren(device.toMap())
     }
 
     fun getDevice(macAddress: String, onSuccess: (DeviceDetail) -> Unit) {
         devicesReference.child(macAddress).get().addOnSuccessListener {
             // getValue method deserializes the data into a DeviceDetail object
             val device = it.getValue(DeviceDetail::class.java)!!
+            device.macAddress = it.key.toString()
             Log.d(TAG, "getDevice: $device")
             onSuccess(device)
         }
     }
 
     fun deleteDevice(device: DeviceDetail) {
-        device.isActive = false
-        devicesReference.child(device.macAddress).setValue(device)
+        // performing soft deletion of the device
+        val deactivatedDevice = mapOf("active" to false)
+        devicesReference.child(device.macAddress).updateChildren(deactivatedDevice)
     }
 }
