@@ -1,4 +1,5 @@
 package id.my.kaorikizuna.incu8tor.ui.addevice
+
 import android.content.ContentValues.TAG
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
@@ -82,15 +83,10 @@ import id.my.kaorikizuna.incu8tor.ui.theme.Red
 @Composable
 fun AddDeviceScreen(onSave: (DeviceDetail) -> Unit) {
 
-//    val (deviceDetail, setDeviceDetail) = remember { mutableStateOf(DeviceDetail()) }
-
-    var deviceDetail by remember { mutableStateOf(DeviceDetail())}
+    val deviceDetail by remember { mutableStateOf(DeviceDetail()) }
 
     Scaffold(
         topBar = {
-//            TopAppBar(
-//                title = { Text("Incu8tor") }
-//            )
             Incu8torModifiableTopBar(deviceTitle = "Incu8tor", actionButton = {})
         }
     ) { paddingValues ->
@@ -104,9 +100,6 @@ fun AddDeviceScreen(onSave: (DeviceDetail) -> Unit) {
         ) {
             OutlinedTextField(
                 value = deviceDetail.deviceName,
-//                onValueChange = { it ->
-//                    setDeviceDetail(deviceDetail.copy(deviceName = it ))
-//                },
                 onValueChange = {
                     deviceDetail.deviceName = it
                 },
@@ -116,9 +109,6 @@ fun AddDeviceScreen(onSave: (DeviceDetail) -> Unit) {
             Spacer(modifier = Modifier.height(8.dp))
             OutlinedTextField(
                 value = deviceDetail.macAddress,
-//                onValueChange = { it ->
-//                    setDeviceDetail(deviceDetail.copy(macAddress = it))
-//                },
                 onValueChange = {
                     deviceDetail.macAddress = it
                 },
@@ -128,9 +118,8 @@ fun AddDeviceScreen(onSave: (DeviceDetail) -> Unit) {
             Spacer(modifier = Modifier.height(16.dp))
 
             // set the device to be in valid range
-//            setDeviceDetail(deviceDetail.copy(settings = DeviceSettings(temperature = Temperature(30, 40), humidity  = Humidity(30, 80))))
-            deviceDetail.settings = DeviceSettings(temperature = Temperature(30, 40), humidity = Humidity(30, 80))
-//   Log.w("asdf", "$deviceDetail")
+            deviceDetail.settings =
+                DeviceSettings(temperature = Temperature(30, 40), humidity = Humidity(30, 80))
 
             var temperatureSliderPositions by remember { mutableStateOf(deviceDetail.settings.temperature.min.toFloat()..deviceDetail.settings.temperature.max.toFloat()) }
             Column {

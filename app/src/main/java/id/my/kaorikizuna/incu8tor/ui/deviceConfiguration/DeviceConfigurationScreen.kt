@@ -58,7 +58,11 @@ import id.my.kaorikizuna.incu8tor.ui.theme.Red
 import id.my.kaorikizuna.incu8tor.viewmodel.DeviceViewModel
 
 @Composable
-fun DeviceConfigurationScreen(deviceDetail: DeviceDetail) {
+fun DeviceConfigurationScreen(
+    deviceDetail: DeviceDetail,
+    onUpdate: (DeviceDetail) -> Unit,
+    onDelete: (DeviceDetail) -> Unit
+) {
     val (currentDeviceDetail, setCurrentDeviceDetail) = remember { mutableStateOf(deviceDetail) }
     val viewModel = DeviceViewModel()
     var showDialog by remember { mutableStateOf(false) }
@@ -74,7 +78,7 @@ fun DeviceConfigurationScreen(deviceDetail: DeviceDetail) {
         DeleteDialog(
             onDismiss = { showDialog = false },
             onConfirm = {
-                viewModel.deleteDevice(currentDeviceDetail)
+                onDelete(deviceDetail)
                 showDialog = false
             })
     }
@@ -194,11 +198,7 @@ fun DeviceConfigurationScreen(deviceDetail: DeviceDetail) {
                 verticalArrangement = Arrangement.Bottom,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                ElevatedButton(onClick = {
-                    viewModel.updateDevice(
-                        device = currentDeviceDetail,
-                    )
-                }) {
+                ElevatedButton(onClick = { onUpdate(currentDeviceDetail) }) {
                     Text(
                         text = "Update",
                         style = MaterialTheme.typography.bodyLarge,
@@ -243,16 +243,16 @@ fun DeleteDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
 
 
 //@Preview
-@Composable
-fun DeviceConfigurationScreenPreview() {
-    val viewModel = DeviceViewModel()
-    val (deviceDetail, setDeviceDetail) = remember { mutableStateOf(DeviceDetail()) }
-    LaunchedEffect(Unit) {
-        viewModel.getDevice("24:DC:C3:45:EA:CC", onSuccess = {
-            setDeviceDetail(it)
-        })
-    }
-    if (deviceDetail != DeviceDetail()) {
-        DeviceConfigurationScreen(deviceDetail)
-    }
-}
+//@Composable
+//fun DeviceConfigurationScreenPreview() {
+//    val viewModel = DeviceViewModel()
+//    val (deviceDetail, setDeviceDetail) = remember { mutableStateOf(DeviceDetail()) }
+//    LaunchedEffect(Unit) {
+//        viewModel.getDevice("24:DC:C3:45:EA:CC", onSuccess = {
+//            setDeviceDetail(it)
+//        })
+//    }
+//    if (deviceDetail != DeviceDetail()) {
+//        DeviceConfigurationScreen(deviceDetail)
+//    }
+//}
