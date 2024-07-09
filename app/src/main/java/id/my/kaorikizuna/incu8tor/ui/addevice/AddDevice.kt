@@ -1,5 +1,56 @@
 package id.my.kaorikizuna.incu8tor.ui.addevice
+import android.content.ContentValues.TAG
+import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOut
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ElevatedButton
 
+import androidx.compose.material3.IconButton
+
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RangeSlider
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SliderColors
+
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.currentCompositionErrors
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+
+import id.my.kaorikizuna.incu8tor.ui.components.Incu8torModifiableTopBar
+import id.my.kaorikizuna.incu8tor.ui.theme.Blue
+import id.my.kaorikizuna.incu8tor.ui.theme.DarkBlue
+import id.my.kaorikizuna.incu8tor.ui.theme.DarkRed
+import id.my.kaorikizuna.incu8tor.ui.theme.Red
+import id.my.kaorikizuna.incu8tor.viewmodel.DeviceViewModel
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.ElevatedButton
@@ -16,9 +67,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.tooling.preview.Preview
+
 import androidx.compose.ui.unit.dp
 import id.my.kaorikizuna.incu8tor.model.DeviceDetail
+import id.my.kaorikizuna.incu8tor.model.DeviceSettings
+import id.my.kaorikizuna.incu8tor.model.Humidity
+import id.my.kaorikizuna.incu8tor.model.Temperature
 import id.my.kaorikizuna.incu8tor.ui.theme.Blue
 import id.my.kaorikizuna.incu8tor.ui.theme.DarkBlue
 import id.my.kaorikizuna.incu8tor.ui.theme.DarkRed
@@ -27,19 +81,17 @@ import id.my.kaorikizuna.incu8tor.ui.theme.Red
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddDeviceScreen(onSave: (DeviceDetail) -> Unit) {
-//    var deviceName by remember { mutableStateOf(TextFieldValue("")) }
-//    var macAddress by remember { mutableStateOf(TextFieldValue("")) }
-//    var temperature by remember { mutableStateOf(0f) }
-//    var humidity by remember { mutableStateOf(0f) }
 
-    val (deviceDetail, setDeviceDetail) = remember { mutableStateOf(DeviceDetail()) }
-    val (currentDeviceDetail, setCurrentDeviceDetail) = remember { mutableStateOf(deviceDetail) }
+//    val (deviceDetail, setDeviceDetail) = remember { mutableStateOf(DeviceDetail()) }
+
+    var deviceDetail by remember { mutableStateOf(DeviceDetail())}
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Incu8tor") }
-            )
+//            TopAppBar(
+//                title = { Text("Incu8tor") }
+//            )
+            Incu8torModifiableTopBar(deviceTitle = "Incu8tor", actionButton = {})
         }
     ) { paddingValues ->
         Column(
@@ -52,8 +104,11 @@ fun AddDeviceScreen(onSave: (DeviceDetail) -> Unit) {
         ) {
             OutlinedTextField(
                 value = deviceDetail.deviceName,
-                onValueChange = { it ->
-                    setDeviceDetail(deviceDetail.copy(deviceName = it ))
+//                onValueChange = { it ->
+//                    setDeviceDetail(deviceDetail.copy(deviceName = it ))
+//                },
+                onValueChange = {
+                    deviceDetail.deviceName = it
                 },
                 label = { Text("Input Device Name") },
                 modifier = Modifier.fillMaxWidth()
@@ -61,20 +116,29 @@ fun AddDeviceScreen(onSave: (DeviceDetail) -> Unit) {
             Spacer(modifier = Modifier.height(8.dp))
             OutlinedTextField(
                 value = deviceDetail.macAddress,
-                onValueChange = { it ->
-                    setDeviceDetail(deviceDetail.copy(macAddress = it))
+//                onValueChange = { it ->
+//                    setDeviceDetail(deviceDetail.copy(macAddress = it))
+//                },
+                onValueChange = {
+                    deviceDetail.macAddress = it
                 },
                 label = { Text("Input MAC Address") },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(16.dp))
-            var temperatureSliderPositions by remember { mutableStateOf(currentDeviceDetail.settings.temperature.min.toFloat()..currentDeviceDetail.settings.temperature.max.toFloat()) }
+
+            // set the device to be in valid range
+//            setDeviceDetail(deviceDetail.copy(settings = DeviceSettings(temperature = Temperature(30, 40), humidity  = Humidity(30, 80))))
+            deviceDetail.settings = DeviceSettings(temperature = Temperature(30, 40), humidity = Humidity(30, 80))
+//   Log.w("asdf", "$deviceDetail")
+
+            var temperatureSliderPositions by remember { mutableStateOf(deviceDetail.settings.temperature.min.toFloat()..deviceDetail.settings.temperature.max.toFloat()) }
             Column {
                 Text("Temperature")
                 RangeSlider(
                     value = temperatureSliderPositions,
                     onValueChange = { temperatureSliderPositions = it },
-                    valueRange = 20f..50f,
+                    valueRange = 30f..40f,
                     colors = SliderDefaults.colors(
                         inactiveTrackColor = DarkRed,
                         activeTrackColor = Red

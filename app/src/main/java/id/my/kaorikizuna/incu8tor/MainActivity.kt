@@ -22,11 +22,13 @@ class MainActivity : ComponentActivity() {
         setContent {
             Incu8torTheme {
                 val viewModel = DeviceViewModel()
-//                val deviceDetail = viewModel.getDevice("24:DC:C3:45:EA:CC")
-//                Log.d(TAG, "device: ${deviceDetail.toString()}")
-//                DeviceConfigurationScreen(deviceDetail)
+
+
                 AddDeviceScreen(onSave = {deviceDetail ->
                     viewModel.addDevice(deviceDetail) })
+
+//                HomeScreen()
+
             }
         }
     }
