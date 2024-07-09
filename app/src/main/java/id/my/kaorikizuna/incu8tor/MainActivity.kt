@@ -8,6 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.ui.platform.LocalContext
+import id.my.kaorikizuna.incu8tor.ui.addevice.AddDeviceScreen
 import id.my.kaorikizuna.incu8tor.ui.deviceConfiguration.DeviceConfigurationScreen
 import id.my.kaorikizuna.incu8tor.ui.deviceConfiguration.DeviceConfigurationScreenPreview
 import id.my.kaorikizuna.incu8tor.ui.home.HomeScreen
@@ -20,11 +21,12 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             Incu8torTheme {
-//                val viewModel = DeviceViewModel()
+                val viewModel = DeviceViewModel()
 //                val deviceDetail = viewModel.getDevice("24:DC:C3:45:EA:CC")
 //                Log.d(TAG, "device: ${deviceDetail.toString()}")
 //                DeviceConfigurationScreen(deviceDetail)
-                DeviceConfigurationScreenPreview()
+                AddDeviceScreen(onSave = {deviceDetail ->
+                    viewModel.addDevice(deviceDetail) })
             }
         }
     }
