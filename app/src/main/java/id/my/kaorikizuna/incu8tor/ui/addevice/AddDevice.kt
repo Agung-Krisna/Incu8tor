@@ -1,4 +1,4 @@
-package id.my.kaorikizuna.incu8tor.ui.deviceConfiguration
+package id.my.kaorikizuna.incu8tor.ui.addevice
 
 import android.content.ContentValues.TAG
 import android.util.Log
@@ -21,14 +21,14 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ElevatedButton
-import androidx.compose.material3.Icon
+
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
+
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SliderColors
-import androidx.compose.material3.SliderDefaults
+
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -39,107 +39,116 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import id.my.kaorikizuna.incu8tor.model.DeviceDetail
-import id.my.kaorikizuna.incu8tor.model.DeviceSettings
-import id.my.kaorikizuna.incu8tor.model.Humidity
-import id.my.kaorikizuna.incu8tor.model.Temperature
+
 import id.my.kaorikizuna.incu8tor.ui.components.Incu8torModifiableTopBar
 import id.my.kaorikizuna.incu8tor.ui.theme.Blue
 import id.my.kaorikizuna.incu8tor.ui.theme.DarkBlue
 import id.my.kaorikizuna.incu8tor.ui.theme.DarkRed
 import id.my.kaorikizuna.incu8tor.ui.theme.Red
 import id.my.kaorikizuna.incu8tor.viewmodel.DeviceViewModel
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RangeSlider
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.TextFieldValue
 
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import id.my.kaorikizuna.incu8tor.model.DeviceDetail
+import id.my.kaorikizuna.incu8tor.model.DeviceSettings
+import id.my.kaorikizuna.incu8tor.model.Humidity
+import id.my.kaorikizuna.incu8tor.model.Temperature
+import id.my.kaorikizuna.incu8tor.ui.theme.Blue
+import id.my.kaorikizuna.incu8tor.ui.theme.DarkBlue
+import id.my.kaorikizuna.incu8tor.ui.theme.DarkRed
+import id.my.kaorikizuna.incu8tor.ui.theme.Red
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DeviceConfigurationScreen(
-    deviceDetail: DeviceDetail,
-    onUpdate: (DeviceDetail) -> Unit,
-    onDelete: (DeviceDetail) -> Unit,
-    onBackClicked: () -> Unit
-) {
-    val (currentDeviceDetail, setCurrentDeviceDetail) = remember { mutableStateOf(deviceDetail) }
-    var showDialog by remember { mutableStateOf(false) }
-//  HAHA HA GOT 'EM
-    LaunchedEffect(deviceDetail) {
-        if (currentDeviceDetail == DeviceDetail()) {
-            setCurrentDeviceDetail(deviceDetail)
+fun AddDeviceScreen(onSave: (DeviceDetail) -> Unit, onBackClicked: () -> Unit) {
+
+    val (deviceDetail, setDeviceDetail) = remember { mutableStateOf(DeviceDetail()) }
+    Scaffold(
+        topBar = {
+            Incu8torModifiableTopBar(
+                deviceTitle = "Incu8tor",
+                actionButton = {},
+                backNavigation = { onBackClicked() })
         }
-    }
-
-    // state hoisting, show dialog only when showDialog is true
-    if (showDialog) {
-        DeleteDialog(
-            onDismiss = { showDialog = false },
-            onConfirm = {
-                showDialog = false
-                onDelete(deviceDetail)
-            })
-    }
-
-
-    Scaffold(topBar = {
-        Incu8torModifiableTopBar(
-            deviceTitle = deviceDetail.deviceName,
-            actionButton = {
-                IconButton(onClick = { showDialog = true }) {
-                    Icon(
-                        imageVector = Icons.Filled.Delete, contentDescription = "Delete"
-                    )
-                }
-            },
-            backNavigation = onBackClicked
-        )
-    })
-    { paddingValues ->
+    ) { paddingValues ->
         Column(
             modifier = Modifier
                 .padding(paddingValues)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+                .padding(16.dp)
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            OutlinedTextField(value = currentDeviceDetail.deviceName,
+            OutlinedTextField(
+                value = deviceDetail.deviceName,
                 onValueChange = {
-                    setCurrentDeviceDetail(currentDeviceDetail.copy(deviceName = it))
+                    setDeviceDetail(deviceDetail.copy(deviceName = it))
                 },
-                label = { Text("Change Device Name") },
-                modifier = Modifier.fillMaxWidth(),
-                maxLines = 1,
-                singleLine = true,
-                supportingText = {
-                    AnimatedTextError(
-                        visible = currentDeviceDetail.deviceName.isEmpty(),
-                        text = "Device Name cannot be empty!"
-                    )
-                })
+                label = { Text("Input Device Name") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            OutlinedTextField(
+                value = deviceDetail.macAddress,
+                onValueChange = {
+                    setDeviceDetail(deviceDetail.copy(macAddress = it))
+                },
+                label = { Text("Input MAC Address") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(16.dp))
 
-            var temperatureSliderPositions by remember { mutableStateOf(currentDeviceDetail.settings.temperature.min.toFloat()..currentDeviceDetail.settings.temperature.max.toFloat()) }
+            // set the device to be in valid range
+            deviceDetail.settings =
+                DeviceSettings(temperature = Temperature(34, 38), humidity = Humidity(50, 70))
+
+            var temperatureSliderPositions by remember { mutableStateOf(deviceDetail.settings.temperature.min.toFloat()..deviceDetail.settings.temperature.max.toFloat()) }
             Column {
                 Text("Temperature")
                 RangeSlider(
-                    value = temperatureSliderPositions, onValueChange = { it ->
+                    value = temperatureSliderPositions,
+                    onValueChange = {
                         temperatureSliderPositions = it
 
-                        // set the temperature while using the humidity from the currently saved result
-                        setCurrentDeviceDetail(
-                            currentDeviceDetail.copy(
+                        setDeviceDetail(
+                            deviceDetail.copy(
                                 settings = DeviceSettings(
                                     temperature = Temperature(
                                         temperatureSliderPositions.start.toInt(),
                                         temperatureSliderPositions.endInclusive.toInt()
-                                    ), humidity = currentDeviceDetail.settings.humidity
+                                    ),
+                                    humidity = deviceDetail.settings.humidity
                                 )
                             )
                         )
-                    }, valueRange = 30f..40f, colors = SliderDefaults.colors(
-                        inactiveTrackColor = DarkRed, activeTrackColor = Red
+//                        temperatureSliderPositions = it
+                    },
+                    valueRange = 30f..40f,
+                    colors = SliderDefaults.colors(
+                        inactiveTrackColor = DarkRed,
+                        activeTrackColor = Red
                     )
                 )
                 Row(
@@ -161,14 +170,13 @@ fun DeviceConfigurationScreen(
             Column {
                 Text("Humidity")
                 RangeSlider(
-                    value = humiditySliderPositions, onValueChange = { it ->
+                    value = humiditySliderPositions,
+                    onValueChange = {
                         humiditySliderPositions = it
-
-                        // set the humidity while keeping the temperature from the saved result
-                        setCurrentDeviceDetail(
-                            currentDeviceDetail.copy(
+                        setDeviceDetail(
+                            deviceDetail.copy(
                                 settings = DeviceSettings(
-                                    temperature = currentDeviceDetail.settings.temperature,
+                                    temperature = deviceDetail.settings.temperature,
                                     humidity = Humidity(
                                         humiditySliderPositions.start.toInt(),
                                         humiditySliderPositions.endInclusive.toInt()
@@ -176,8 +184,11 @@ fun DeviceConfigurationScreen(
                                 )
                             )
                         )
-                    }, valueRange = 30f..80f, colors = SliderDefaults.colors(
-                        inactiveTrackColor = DarkBlue, activeTrackColor = Blue
+                    },
+                    valueRange = 30f..80f,
+                    colors = SliderDefaults.colors(
+                        inactiveTrackColor = DarkBlue,
+                        activeTrackColor = Blue
                     )
                 )
                 Row(
@@ -202,63 +213,14 @@ fun DeviceConfigurationScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Button(onClick = {
-                    onUpdate(currentDeviceDetail)
+                    Log.w("asdfasdf", "$deviceDetail")
+                    onSave(deviceDetail)
                     onBackClicked()
                 }) {
-                    Text(
-                        text = "Update",
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Text(text = "Save")
                 }
             }
+
         }
     }
 }
-
-@Composable
-fun AnimatedTextError(visible: Boolean, text: String) {
-    val density = LocalDensity.current
-    AnimatedVisibility(visible = visible, enter = slideInVertically {
-        with(density) { -10.dp.roundToPx() }
-    } + fadeIn(initialAlpha = 0.3f), exit = slideOutVertically() + fadeOut()) {
-        Text(
-            text = text, color = MaterialTheme.colorScheme.error
-        )
-    }
-}
-
-@Composable
-fun DeleteDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
-    AlertDialog(icon = {
-        Icon(Icons.Filled.Delete, contentDescription = "Delete Device")
-    }, onDismissRequest = onDismiss, title = {
-        Text(text = "Delete Device")
-    }, text = {
-        Text(text = "Are you sure you want to delete this device?")
-    }, confirmButton = {
-        TextButton(onClick = onConfirm) {
-            Text("Confirm")
-        }
-    }, dismissButton = {
-        TextButton(onClick = onDismiss) {
-            Text("Cancel")
-        }
-    })
-}
-
-
-//@Preview
-//@Composable
-//fun DeviceConfigurationScreenPreview() {
-//    val viewModel = DeviceViewModel()
-//    val (deviceDetail, setDeviceDetail) = remember { mutableStateOf(DeviceDetail()) }
-//    LaunchedEffect(Unit) {
-//        viewModel.getDevice("24:DC:C3:45:EA:CC", onSuccess = {
-//            setDeviceDetail(it)
-//        })
-//    }
-//    if (deviceDetail != DeviceDetail()) {
-//        DeviceConfigurationScreen(deviceDetail)
-//    }
-//}
