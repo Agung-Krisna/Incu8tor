@@ -23,7 +23,6 @@ import id.my.kaorikizuna.incu8tor.ui.home.HomeScreen
 import id.my.kaorikizuna.incu8tor.ui.theme.Incu8torTheme
 import id.my.kaorikizuna.incu8tor.viewmodel.DeviceViewModel
 
-// TODO add the search functionality on home screen
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

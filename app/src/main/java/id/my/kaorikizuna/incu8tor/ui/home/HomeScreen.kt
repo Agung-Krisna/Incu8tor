@@ -30,29 +30,18 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import id.my.kaorikizuna.incu8tor.R
-import id.my.kaorikizuna.incu8tor.model.Device
 import id.my.kaorikizuna.incu8tor.model.DeviceDetail
 import id.my.kaorikizuna.incu8tor.ui.components.Incu8torSearchBar
 import id.my.kaorikizuna.incu8tor.ui.components.ErrorToast
-import id.my.kaorikizuna.incu8tor.ui.components.onSearchClicked
 import id.my.kaorikizuna.incu8tor.viewmodel.DeviceViewModel
 
-// dummy devices
-val devices = listOf(
-    Device(
-        name = "Incubator Kandang Timur", macAddress = "77:63:74:8B:62:E8", isConnected = true
-    ),
-    Device(
-        name = "Incubator Kandang Barat", macAddress = "41:00:FB:64:82:BA", isConnected = false
-    ),
-)
 
 @Composable
 fun HomeScreen(navController: NavController, onDeviceClicked: (DeviceDetail) -> Unit) {
     val viewModel = DeviceViewModel()
-
 //  turns out that the second positional argument of remember is the setter function,
     val (devices, setDevices) = remember { mutableStateOf(emptyList<DeviceDetail>()) }
+    val showSearchedDevices = remember { mutableStateOf(false) }
 
     // declaring error toast
     val errorToast = remember { ErrorToast() }
@@ -63,7 +52,23 @@ fun HomeScreen(navController: NavController, onDeviceClicked: (DeviceDetail) -> 
     }
 
     Scaffold(topBar = {
-        Incu8torSearchBar(::onSearchClicked)
+        Incu8torSearchBar(onSearchInitiated = { query ->
+            viewModel.searchDevices(query,
+                onSuccess = { devices ->
+                    setDevices(devices)
+                    Log.d("device", "$devices")
+                },
+                onFailure = { exception -> errorToast.show(exception.message.toString()) })
+        },
+            // on search, empty the devices first
+            onSearchClicked = {
+                showSearchedDevices.value = true
+                setDevices(emptyList())
+            },
+            // on back, repopulate the devices
+            onBackClicked = {
+                showSearchedDevices.value = false
+            })
     }, floatingActionButton = {
         FloatingActionButton(
             onClick = { navController.navigate("addDevice") },
@@ -75,25 +80,21 @@ fun HomeScreen(navController: NavController, onDeviceClicked: (DeviceDetail) -> 
         }
     }) { innerPadding ->
         Column {
-
-            viewModel.getAllDevices(onSuccess = {
-                setDevices(it)
-                Log.d("devices", "$devices ${it.size}")
-            }, onFailure = { exception ->
-                errorToast.show(exception.message.toString())
-            })
-
+            if (!showSearchedDevices.value) {
+                viewModel.getAllDevices(onSuccess = {
+                    setDevices(it)
+                    Log.d("devices", "$devices ${it.size}")
+                }, onFailure = { exception ->
+                    errorToast.show(exception.message.toString())
+                })
+            }
             Spacer(modifier = Modifier.height(10.dp))
-
             LazyColumn(
                 modifier = Modifier.padding(innerPadding),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(devices) { device ->
-                    DeviceCard(
-                        device,
-                        onClick = { onDeviceClicked(device) }
-                    )
+                    DeviceCard(device, onClick = { onDeviceClicked(device) })
                 }
             }
         }
@@ -113,12 +114,10 @@ fun DeviceCard(deviceDetail: DeviceDetail, onClick: () -> Unit) {
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
-                    text = deviceDetail.deviceName,
-                    style = MaterialTheme.typography.titleMedium
+                    text = deviceDetail.deviceName, style = MaterialTheme.typography.titleMedium
                 )
                 Text(
-                    text = deviceDetail.macAddress,
-                    style = MaterialTheme.typography.bodySmall
+                    text = deviceDetail.macAddress, style = MaterialTheme.typography.bodySmall
                 )
             }
             // the icon needs to be within a container (box or row) to be able to be centered vertically

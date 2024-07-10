@@ -70,4 +70,32 @@ class DeviceViewModel : ViewModel() {
         val deactivatedDevice = mapOf("active" to false)
         devicesReference.child(device.macAddress).updateChildren(deactivatedDevice)
     }
+
+    fun searchDevices(
+        query: String,
+        onSuccess: (List<DeviceDetail>) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val devices = mutableListOf<DeviceDetail>()
+
+        // endAt is tricking the firebase to search all possible permutations of the query
+        devicesReference.orderByChild("deviceName").startAt(query).endAt("$query\uf8ff")
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    for (snapshot in dataSnapshot.children) {
+                        val device = snapshot.getValue(DeviceDetail::class.java)!!
+                        device.macAddress = snapshot.key.toString()
+                        if (device.active) {
+                            devices.add(device)
+                        }
+                    }
+                    return onSuccess(devices)
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Log.w(TAG, "Failed to read value.", error.toException())
+                    return onFailure(error.toException())
+                }
+            })
+    }
 }

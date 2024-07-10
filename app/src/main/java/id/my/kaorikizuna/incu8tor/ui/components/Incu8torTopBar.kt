@@ -27,34 +27,44 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import id.my.kaorikizuna.incu8tor.R
 
 
 // title changed if searching or not
 // TODO implement this
-fun onSearchClicked(searchTitle: String) {
-    println("Searched for $searchTitle")
-}
+//fun onSearchClicked(
+//    searchQuery: String,
+//    onSuccess: (List<DeviceDetail>) -> Unit,
+//    onFailure: (Exception) -> Unit
+//) {
+//    val viewModel = DeviceViewModel()
+//    viewModel.searchDevices(query = searchQuery, onSuccess = onSuccess, onFailure = onFailure)
+//}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Incu8torSearchBar(onSearchClicked: (String) -> Unit) {
+fun Incu8torSearchBar(
+    onSearchInitiated: (String) -> Unit,
+    onSearchClicked: () -> Unit,
+    onBackClicked: () -> Unit
+) {
     var showSearchField by remember { mutableStateOf(false) }
     TopAppBar(title = {
         if (showSearchField) {
             Surface(
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                SearchField(onSearchClicked)
+                SearchField(onSearchInitiated)
             }
-            SearchField(onSearchClicked)
         } else {
             Text(stringResource(id = R.string.app_name))
         }
     }, actions = {
         if (!showSearchField) {
-            IconButton(onClick = { showSearchField = true }) {
+            IconButton(onClick = {
+                showSearchField = true
+                onSearchClicked()
+            }) {
                 Icon(imageVector = Icons.Filled.Search, contentDescription = "Search")
             }
         }
@@ -62,7 +72,10 @@ fun Incu8torSearchBar(onSearchClicked: (String) -> Unit) {
         // this is quite handy
         navigationIcon = {
             if (showSearchField) {
-                IconButton(onClick = { showSearchField = false }) {
+                IconButton(onClick = {
+                    showSearchField = false
+                    onBackClicked()
+                }) {
                     Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "Back")
                 }
             }
@@ -89,12 +102,12 @@ fun Incu8torModifiableTopBar(
     )
 }
 
-@Preview
-@Composable
-fun Incu8torSearchBarPreview() {
-    // function reference (::) is used to pass the function as a parameter
-    Incu8torSearchBar(::onSearchClicked)
-}
+//@Preview
+//@Composable
+//fun Incu8torSearchBarPreview() {
+//    // function reference (::) is used to pass the function as a parameter
+//    Incu8torSearchBar(::onSearchClicked)
+//}
 
 @Composable
 fun SearchField(

@@ -105,7 +105,6 @@ fun AddDeviceScreen(onSave: (DeviceDetail) -> Unit, onBackClicked: () -> Unit) {
                 value = deviceDetail.deviceName,
                 onValueChange = {
                     setDeviceDetail(deviceDetail.copy(deviceName = it))
-//                    deviceDetail.deviceName = it
                 },
                 label = { Text("Input Device Name") },
                 modifier = Modifier.fillMaxWidth()
@@ -115,7 +114,6 @@ fun AddDeviceScreen(onSave: (DeviceDetail) -> Unit, onBackClicked: () -> Unit) {
                 value = deviceDetail.macAddress,
                 onValueChange = {
                     setDeviceDetail(deviceDetail.copy(macAddress = it))
-//                    deviceDetail.macAddress = it
                 },
                 label = { Text("Input MAC Address") },
                 modifier = Modifier.fillMaxWidth()

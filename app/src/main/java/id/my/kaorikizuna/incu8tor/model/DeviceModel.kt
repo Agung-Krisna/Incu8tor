@@ -46,6 +46,10 @@ data class DeviceDetail(
     var settings: DeviceSettings,
     var sensors: DeviceSensors,
 ) {
+    // computed property
+    val insensitiveName: String
+        get() = deviceName.lowercase()
+
     constructor() : this(
         false,
         0,
