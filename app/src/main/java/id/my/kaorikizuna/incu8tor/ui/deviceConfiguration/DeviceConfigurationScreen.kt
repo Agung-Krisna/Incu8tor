@@ -57,6 +57,7 @@ import id.my.kaorikizuna.incu8tor.ui.theme.DarkBlue
 import id.my.kaorikizuna.incu8tor.ui.theme.DarkRed
 import id.my.kaorikizuna.incu8tor.ui.theme.Red
 import id.my.kaorikizuna.incu8tor.viewmodel.DeviceViewModel
+import kotlin.math.roundToInt
 
 @Composable
 fun DeviceConfigurationScreen(
@@ -132,8 +133,9 @@ fun DeviceConfigurationScreen(
                             currentDeviceDetail.copy(
                                 settings = DeviceSettings(
                                     temperature = Temperature(
-                                        temperatureSliderPositions.start.toInt(),
-                                        temperatureSliderPositions.endInclusive.toInt()
+                                        temperatureSliderPositions.start.roundToInt().toDouble(),
+                                        temperatureSliderPositions.endInclusive.roundToInt()
+                                            .toDouble()
                                     ), humidity = currentDeviceDetail.settings.humidity
                                 )
                             )
@@ -170,8 +172,8 @@ fun DeviceConfigurationScreen(
                                 settings = DeviceSettings(
                                     temperature = currentDeviceDetail.settings.temperature,
                                     humidity = Humidity(
-                                        humiditySliderPositions.start.toInt(),
-                                        humiditySliderPositions.endInclusive.toInt()
+                                        humiditySliderPositions.start.roundToInt().toDouble(),
+                                        humiditySliderPositions.endInclusive.roundToInt().toDouble()
                                     )
                                 )
                             )

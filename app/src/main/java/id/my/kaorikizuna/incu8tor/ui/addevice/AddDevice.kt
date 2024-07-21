@@ -79,6 +79,7 @@ import id.my.kaorikizuna.incu8tor.ui.theme.Blue
 import id.my.kaorikizuna.incu8tor.ui.theme.DarkBlue
 import id.my.kaorikizuna.incu8tor.ui.theme.DarkRed
 import id.my.kaorikizuna.incu8tor.ui.theme.Red
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -122,7 +123,10 @@ fun AddDeviceScreen(onSave: (DeviceDetail) -> Unit, onBackClicked: () -> Unit) {
 
             // set the device to be in valid range
             deviceDetail.settings =
-                DeviceSettings(temperature = Temperature(34, 38), humidity = Humidity(50, 70))
+                DeviceSettings(
+                    temperature = Temperature(34.0, 38.0),
+                    humidity = Humidity(50.0, 70.0)
+                )
 
             var temperatureSliderPositions by remember { mutableStateOf(deviceDetail.settings.temperature.min.toFloat()..deviceDetail.settings.temperature.max.toFloat()) }
             Column {
@@ -136,8 +140,9 @@ fun AddDeviceScreen(onSave: (DeviceDetail) -> Unit, onBackClicked: () -> Unit) {
                             deviceDetail.copy(
                                 settings = DeviceSettings(
                                     temperature = Temperature(
-                                        temperatureSliderPositions.start.toInt(),
-                                        temperatureSliderPositions.endInclusive.toInt()
+                                        temperatureSliderPositions.start.roundToInt().toDouble(),
+                                        temperatureSliderPositions.endInclusive.roundToInt()
+                                            .toDouble()
                                     ),
                                     humidity = deviceDetail.settings.humidity
                                 )
@@ -178,8 +183,8 @@ fun AddDeviceScreen(onSave: (DeviceDetail) -> Unit, onBackClicked: () -> Unit) {
                                 settings = DeviceSettings(
                                     temperature = deviceDetail.settings.temperature,
                                     humidity = Humidity(
-                                        humiditySliderPositions.start.toInt(),
-                                        humiditySliderPositions.endInclusive.toInt()
+                                        humiditySliderPositions.start.roundToInt().toDouble(),
+                                        humiditySliderPositions.endInclusive.roundToInt().toDouble()
                                     )
                                 )
                             )
@@ -213,7 +218,6 @@ fun AddDeviceScreen(onSave: (DeviceDetail) -> Unit, onBackClicked: () -> Unit) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Button(onClick = {
-                    Log.w("asdfasdf", "$deviceDetail")
                     onSave(deviceDetail)
                     onBackClicked()
                 }) {

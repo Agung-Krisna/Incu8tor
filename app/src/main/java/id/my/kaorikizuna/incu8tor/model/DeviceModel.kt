@@ -7,17 +7,17 @@ import androidx.lifecycle.ViewModel
 data class Device(var name: String, var macAddress: String, var isConnected: Boolean)
 
 data class Humidity(
-    var min: Int,
-    var max: Int
+    var min: Double,
+    var max: Double
 ) {
-    constructor() : this(0, 0)
+    constructor() : this(0.0, 0.0)
 }
 
 data class Temperature(
-    var min: Int,
-    var max: Int
+    var min: Double,
+    var max: Double
 ) {
-    constructor() : this(0, 0)
+    constructor() : this(0.0, 0.0)
 }
 
 // DeviceSettings from the app
@@ -25,15 +25,15 @@ data class DeviceSettings(
     var humidity: Humidity,
     var temperature: Temperature
 ) {
-    constructor() : this(Humidity(0, 0), Temperature(0, 0))
+    constructor() : this(Humidity(0.0, 0.0), Temperature(0.0, 0.0))
 }
 
 // DeviceSensors from the actual device
 data class DeviceSensors(
-    var humidity: Int,
-    var temperature: Int
+    var humidity: Double,
+    var temperature: Double
 ) {
-    constructor() : this(0, 0)
+    constructor() : this(0.0, 0.0)
 }
 
 data class DeviceDetail(
@@ -56,8 +56,8 @@ data class DeviceDetail(
         "",
         false,
         "",
-        DeviceSettings(Humidity(0, 0), Temperature(0, 0)),
-        DeviceSensors(0, 0),
+        DeviceSettings(Humidity(0.0, 0.0), Temperature(0.0, 0.0)),
+        DeviceSensors(0.0, 0.0),
     )
 }
 
